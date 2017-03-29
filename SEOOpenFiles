@@ -1,0 +1,42 @@
+index, trip, settings, shortDestination, config, Db
+
+Config
+______________________________
+
+    static public function getRandomLocation() {
+        if(empty(self::$_randomlySelectedLocation)){
+            $db = new \Db();
+            self::$_randomlySelectedLocation['countryId'] = self::$_topCountriesIds[array_rand(self::$_topCountriesIds)];
+            $citiesAtSelectedCountry = $db->getRandomCitiesByCountry(self::$_randomlySelectedLocation['countryId']);
+            $countryCode = self::getCountryCodeById(self::$_randomlySelectedLocation['countryId']);
+            $countryName =  self::getCountryNameByCode($countryCode);
+            $city = $citiesAtSelectedCountry[array_rand($citiesAtSelectedCountry)]['name'];
+            self::$_randomlySelectedLocation['name'] =  $city . ', ' . $countryName ;
+            self::$_randomlySelectedLocation['code'] =  $citiesAtSelectedCountry[array_rand($citiesAtSelectedCountry)]['place_id'];
+            return self::$_randomlySelectedLocation;
+        }else{
+            $db = new \Db();
+            $citiesAtSelectedCountry = $db->getRandomCitiesByCountry(self::$_randomlySelectedLocation['countryId']);
+            $countryCode = self::getCountryCodeById(self::$_randomlySelectedLocation['countryId']);
+            $countryName =  self::getCountryNameByCode($countryCode);
+            $city = $citiesAtSelectedCountry[array_rand($citiesAtSelectedCountry)]['name'];
+            self::$_randomlySelectedLocation['name'] =  $city . ', ' . $countryName ;
+            self::$_randomlySelectedLocation['code'] =  $citiesAtSelectedCountry[array_rand($citiesAtSelectedCountry)]['place_id'];
+            return self::$_randomlySelectedLocation;
+        }
+    }
+
+Db
+__________________________________________
+
+   public function getRandomCitiesByCountry($countryId){
+
+        $query = "SELECT places.place_id, places.country_id, places.name
+                  FROM places, scores
+                  WHERE places.place_id = scores.score_id
+                  AND scores.romantic >8
+                  AND places.country_id = $countryId
+                  AND places.type =  'dest'
+                  LIMIT 0 , 30";
+        return $this->db->getAll($query);
+    }
